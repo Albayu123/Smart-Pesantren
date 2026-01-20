@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { Donatur } from '../types';
 import { Plus, Trash2, Edit2, Search, Heart, Mail, Loader2, X, Sparkles } from 'lucide-react';
-import { generateThankYouLetter } from '../services/gemini';
+
 
 interface DonaturManagerProps {
   data: Donatur[];
@@ -12,13 +12,13 @@ const DonaturManager: React.FC<DonaturManagerProps> = ({ data, onUpdate }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [letterModal, setLetterModal] = useState<{open: boolean, content: string, loading: boolean}>({ open: false, content: '', loading: false });
-  
+  const [letterModal, setLetterModal] = useState<{ open: boolean, content: string, loading: boolean }>({ open: false, content: '', loading: false });
+
   const [formData, setFormData] = useState<Partial<Donatur>>({
     nama: '', jumlahBeras: 0, noHp: '', catatan: '', tanggal: new Date().toISOString().split('T')[0]
   });
 
-  const filteredData = data.filter(d => 
+  const filteredData = data.filter(d =>
     d.nama.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -31,6 +31,7 @@ const DonaturManager: React.FC<DonaturManagerProps> = ({ data, onUpdate }) => {
       const donaturData = formData as Omit<Donatur, 'id'>;
       const newDonatur: Donatur = {
         ...donaturData,
+        // eslint-disable-next-line react-hooks/purity
         id: Date.now().toString(),
       };
       onUpdate([...data, newDonatur]);
@@ -56,17 +57,38 @@ const DonaturManager: React.FC<DonaturManagerProps> = ({ data, onUpdate }) => {
     setIsModalOpen(false);
   };
 
-  const handleGenerateLetter = async (donatur: Donatur) => {
+  const generateStaticLetter = (nama: string, jumlah: number) => {
+    return `Kepada Yth. Bapak/Ibu/Sdr/i ${nama},
+
+Assalamu'alaikum Warahmatullahi Wabarakatuh.
+
+Puji syukur kita panjatkan ke hadirat Allah SWT atas limpahan rahmat dan karunia-Nya.
+
+Kami dari pengurus pesantren mengucapkan ribuan terima kasih yang sebesar-besarnya atas sedekah beras sebanyak ${jumlah} Kg yang telah Anda berikan. Masya Allah, bantuan ini sangat berarti bagi santri-santri kami.
+
+Semoga Allah SWT membalas kebaikan Anda dengan pahala yang berlipat ganda, memberkahi harta yang tersisa, mensucikan harta yang disedekahkan, serta menjadikan ini sebagai amal jariyah yang pahalanya terus mengalir. Aamiin ya Rabbal 'Alamin.
+
+Wassalamu'alaikum Warahmatullahi Wabarakatuh.
+
+Hormat kami,
+Pengurus Pesantren`;
+  };
+
+  const handleGenerateLetter = (donatur: Donatur) => {
     setLetterModal({ open: true, content: '', loading: true });
-    const letter = await generateThankYouLetter(donatur.nama, donatur.jumlahBeras);
-    setLetterModal({ open: true, content: letter, loading: false });
+
+    // Simulate a brief "thinking" time for better UX
+    setTimeout(() => {
+      const letter = generateStaticLetter(donatur.nama, donatur.jumlahBeras);
+      setLetterModal({ open: true, content: letter, loading: false });
+    }, 600);
   };
 
   return (
     <div className="p-4 md:p-6 pb-20 md:pb-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h2 className="text-2xl font-bold text-gray-800">Manajemen Donasi Beras</h2>
-        <button 
+        <button
           onClick={() => setIsModalOpen(true)}
           className="w-full md:w-auto bg-yellow-500 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-yellow-600 transition shadow-sm"
         >
@@ -76,9 +98,9 @@ const DonaturManager: React.FC<DonaturManagerProps> = ({ data, onUpdate }) => {
 
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-        <input 
-          type="text" 
-          placeholder="Cari nama donatur..." 
+        <input
+          type="text"
+          placeholder="Cari nama donatur..."
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -109,8 +131,8 @@ const DonaturManager: React.FC<DonaturManagerProps> = ({ data, onUpdate }) => {
                   <td className="px-6 py-4 text-gray-600">{donatur.noHp}</td>
                   <td className="px-6 py-4 text-gray-500 italic text-sm truncate max-w-xs">{donatur.catatan}</td>
                   <td className="px-6 py-4 text-right flex justify-end gap-2">
-                     <button 
-                      onClick={() => handleGenerateLetter(donatur)} 
+                    <button
+                      onClick={() => handleGenerateLetter(donatur)}
                       className="text-pesantren-600 hover:text-pesantren-800 p-1 border border-pesantren-200 rounded hover:bg-pesantren-50"
                       title="Buat Surat Ucapan"
                     >
@@ -125,7 +147,7 @@ const DonaturManager: React.FC<DonaturManagerProps> = ({ data, onUpdate }) => {
                   </td>
                 </tr>
               ))}
-               {filteredData.length === 0 && (
+              {filteredData.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-gray-500">Belum ada data donasi.</td>
                 </tr>
@@ -135,37 +157,37 @@ const DonaturManager: React.FC<DonaturManagerProps> = ({ data, onUpdate }) => {
         </div>
       </div>
 
-       {isModalOpen && (
+      {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-bold mb-4">{editingId ? 'Edit Donatur' : 'Catat Donasi Baru'}</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nama Donatur</label>
-                <input required type="text" className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-yellow-400 focus:outline-none" 
-                  value={formData.nama} onChange={e => setFormData({...formData, nama: e.target.value})} />
+                <input required type="text" className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                  value={formData.nama} onChange={e => setFormData({ ...formData, nama: e.target.value })} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Jumlah Beras (Kg)</label>
-                  <input required type="number" min="0" step="0.5" className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-yellow-400 focus:outline-none" 
-                    value={formData.jumlahBeras} onChange={e => setFormData({...formData, jumlahBeras: parseFloat(e.target.value)})} />
+                  <input required type="number" min="0" step="0.5" className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                    value={formData.jumlahBeras} onChange={e => setFormData({ ...formData, jumlahBeras: parseFloat(e.target.value) })} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-                  <input required type="date" className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-yellow-400 focus:outline-none" 
-                    value={formData.tanggal} onChange={e => setFormData({...formData, tanggal: e.target.value})} />
+                  <input required type="date" className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                    value={formData.tanggal} onChange={e => setFormData({ ...formData, tanggal: e.target.value })} />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">No. Handphone</label>
-                <input type="text" className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-yellow-400 focus:outline-none" 
-                  value={formData.noHp} onChange={e => setFormData({...formData, noHp: e.target.value})} />
+                <input type="text" className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                  value={formData.noHp} onChange={e => setFormData({ ...formData, noHp: e.target.value })} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Catatan / Doa</label>
-                <textarea className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-yellow-400 focus:outline-none" 
-                  value={formData.catatan} onChange={e => setFormData({...formData, catatan: e.target.value})} rows={2} />
+                <textarea className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                  value={formData.catatan} onChange={e => setFormData({ ...formData, catatan: e.target.value })} rows={2} />
               </div>
               <div className="flex justify-end gap-3 mt-6">
                 <button type="button" onClick={closeModal} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Batal</button>
@@ -177,34 +199,34 @@ const DonaturManager: React.FC<DonaturManagerProps> = ({ data, onUpdate }) => {
       )}
 
       {letterModal.open && (
-         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-           <div className="bg-white rounded-xl shadow-2xl p-0 w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-             <div className="bg-pesantren-600 p-4 text-white flex justify-between items-center flex-shrink-0">
-               <h3 className="font-bold flex items-center gap-2 text-sm md:text-base"><Sparkles size={18} className="text-yellow-300"/> Asisten Surat (AI)</h3>
-               <button onClick={() => setLetterModal({ ...letterModal, open: false })}><X size={20} /></button>
-             </div>
-             <div className="p-4 md:p-6 overflow-y-auto">
-                {letterModal.loading ? (
-                  <div className="flex flex-col items-center justify-center py-10 space-y-4">
-                    <Loader2 className="animate-spin text-pesantren-600" size={40} />
-                    <p className="text-gray-500 text-center text-sm">Sedang menyusun kata-kata mutiara...</p>
-                  </div>
-                ) : (
-                  <div className="prose max-w-none text-gray-800 whitespace-pre-wrap font-serif bg-yellow-50 p-4 md:p-6 rounded-lg border border-yellow-200 text-sm md:text-base">
-                    {letterModal.content}
-                  </div>
-                )}
-             </div>
-             <div className="p-4 border-t bg-gray-50 flex justify-end gap-2 flex-shrink-0">
-                <button onClick={() => setLetterModal({...letterModal, open: false})} className="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm">Tutup</button>
-                {!letterModal.loading && (
-                  <button onClick={() => navigator.clipboard.writeText(letterModal.content)} className="px-4 py-2 bg-pesantren-600 text-white rounded-lg hover:bg-pesantren-700 text-sm">
-                    Salin Teks
-                  </button>
-                )}
-             </div>
-           </div>
-         </div>
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl p-0 w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-pesantren-600 p-4 text-white flex justify-between items-center flex-shrink-0">
+              <h3 className="font-bold flex items-center gap-2 text-sm md:text-base"><Sparkles size={18} className="text-yellow-300" /> Surat Ucapan</h3>
+              <button onClick={() => setLetterModal({ ...letterModal, open: false })}><X size={20} /></button>
+            </div>
+            <div className="p-4 md:p-6 overflow-y-auto">
+              {letterModal.loading ? (
+                <div className="flex flex-col items-center justify-center py-10 space-y-4">
+                  <Loader2 className="animate-spin text-pesantren-600" size={40} />
+                  <p className="text-gray-500 text-center text-sm">Sedang menyusun kata-kata mutiara...</p>
+                </div>
+              ) : (
+                <div className="prose max-w-none text-gray-800 whitespace-pre-wrap font-serif bg-yellow-50 p-4 md:p-6 rounded-lg border border-yellow-200 text-sm md:text-base">
+                  {letterModal.content}
+                </div>
+              )}
+            </div>
+            <div className="p-4 border-t bg-gray-50 flex justify-end gap-2 flex-shrink-0">
+              <button onClick={() => setLetterModal({ ...letterModal, open: false })} className="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm">Tutup</button>
+              {!letterModal.loading && (
+                <button onClick={() => navigator.clipboard.writeText(letterModal.content)} className="px-4 py-2 bg-pesantren-600 text-white rounded-lg hover:bg-pesantren-700 text-sm">
+                  Salin Teks
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

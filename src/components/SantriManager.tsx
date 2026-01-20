@@ -11,13 +11,13 @@ const SantriManager: React.FC<SantriManagerProps> = ({ data, onUpdate }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  
+
   // Form State
   const [formData, setFormData] = useState<Partial<Santri>>({
     nama: '', nis: '', kelas: '', wali: '', alamat: '', status: 'Aktif'
   });
 
-  const filteredData = data.filter(s => 
+  const filteredData = data.filter(s =>
     s.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.nis.includes(searchTerm)
   );
@@ -32,6 +32,7 @@ const SantriManager: React.FC<SantriManagerProps> = ({ data, onUpdate }) => {
       const santriData = formData as Omit<Santri, 'id'>;
       const newSantri: Santri = {
         ...santriData,
+        // eslint-disable-next-line react-hooks/purity
         id: Date.now().toString(),
         tanggalMasuk: new Date().toISOString().split('T')[0],
       };
@@ -62,7 +63,7 @@ const SantriManager: React.FC<SantriManagerProps> = ({ data, onUpdate }) => {
     <div className="p-4 md:p-6 pb-20 md:pb-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h2 className="text-2xl font-bold text-gray-800">Data Santri</h2>
-        <button 
+        <button
           onClick={() => setIsModalOpen(true)}
           className="w-full md:w-auto bg-pesantren-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-pesantren-700 transition shadow-sm"
         >
@@ -72,9 +73,9 @@ const SantriManager: React.FC<SantriManagerProps> = ({ data, onUpdate }) => {
 
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-        <input 
-          type="text" 
-          placeholder="Cari nama atau NIS..." 
+        <input
+          type="text"
+          placeholder="Cari nama atau NIS..."
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pesantren-500"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -110,10 +111,9 @@ const SantriManager: React.FC<SantriManagerProps> = ({ data, onUpdate }) => {
                   <td className="px-6 py-4 text-gray-700">{santri.kelas}</td>
                   <td className="px-6 py-4 text-gray-700">{santri.wali}</td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      santri.status === 'Aktif' ? 'bg-green-100 text-green-700' :
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${santri.status === 'Aktif' ? 'bg-green-100 text-green-700' :
                       santri.status === 'Cuti' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'
-                    }`}>
+                      }`}>
                       {santri.status}
                     </span>
                   </td>
@@ -144,35 +144,35 @@ const SantriManager: React.FC<SantriManagerProps> = ({ data, onUpdate }) => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-                <input required type="text" className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-pesantren-500 focus:outline-none" 
-                  value={formData.nama} onChange={e => setFormData({...formData, nama: e.target.value})} />
+                <input required type="text" className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-pesantren-500 focus:outline-none"
+                  value={formData.nama} onChange={e => setFormData({ ...formData, nama: e.target.value })} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">NIS</label>
-                  <input required type="text" className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-pesantren-500 focus:outline-none" 
-                    value={formData.nis} onChange={e => setFormData({...formData, nis: e.target.value})} />
+                  <input required type="text" className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-pesantren-500 focus:outline-none"
+                    value={formData.nis} onChange={e => setFormData({ ...formData, nis: e.target.value })} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
-                  <input required type="text" className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-pesantren-500 focus:outline-none" 
-                    value={formData.kelas} onChange={e => setFormData({...formData, kelas: e.target.value})} />
+                  <input required type="text" className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-pesantren-500 focus:outline-none"
+                    value={formData.kelas} onChange={e => setFormData({ ...formData, kelas: e.target.value })} />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nama Wali</label>
-                <input required type="text" className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-pesantren-500 focus:outline-none" 
-                  value={formData.wali} onChange={e => setFormData({...formData, wali: e.target.value})} />
+                <input required type="text" className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-pesantren-500 focus:outline-none"
+                  value={formData.wali} onChange={e => setFormData({ ...formData, wali: e.target.value })} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
-                <textarea required className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-pesantren-500 focus:outline-none" 
-                  value={formData.alamat} onChange={e => setFormData({...formData, alamat: e.target.value})} rows={2} />
+                <textarea required className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-pesantren-500 focus:outline-none"
+                  value={formData.alamat} onChange={e => setFormData({ ...formData, alamat: e.target.value })} rows={2} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-pesantren-500 focus:outline-none"
-                  value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as any})}>
+                  value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value as 'Aktif' | 'Cuti' | 'Alumni' })}>
                   <option value="Aktif">Aktif</option>
                   <option value="Cuti">Cuti</option>
                   <option value="Alumni">Alumni</option>

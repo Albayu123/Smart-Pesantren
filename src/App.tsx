@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, Users, Heart, Menu, LogOut, Sprout, X } from 'lucide-react';
 import { AppView, type Santri, type Donatur, type Stats } from './types';
@@ -6,9 +7,31 @@ import Dashboard from './components/Dashboard';
 import SantriManager from './components/SantriManager';
 import DonaturManager from './components/DonaturManager';
 
+interface NavItemProps {
+  view: AppView;
+  icon: React.ElementType;
+  label: string;
+  currentView: AppView;
+  isSidebarOpen: boolean;
+  onClick: (view: AppView) => void;
+}
+
+const NavItem: React.FC<NavItemProps> = ({ view, icon: Icon, label, currentView, isSidebarOpen, onClick }) => (
+  <button
+    onClick={() => onClick(view)}
+    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 ${currentView === view
+      ? 'bg-pesantren-700 text-white shadow-md'
+      : 'text-pesantren-100 hover:bg-pesantren-800 hover:text-white'
+      }`}
+  >
+    <Icon size={20} />
+    <span className={`${!isSidebarOpen && 'md:hidden'} block`}>{label}</span>
+  </button>
+);
+
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>(AppView.DASHBOARD);
-  
+
   const [isSidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
 
   useEffect(() => {
@@ -22,7 +45,7 @@ const App: React.FC = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  
+
   const [santriData, setSantriData] = useState<Santri[]>([]);
   const [donaturData, setDonaturData] = useState<Donatur[]>([]);
 
@@ -54,31 +77,17 @@ const App: React.FC = () => {
     totalBeras: donaturData.reduce((sum, d) => sum + d.jumlahBeras, 0)
   };
 
-  const NavItem = ({ view, icon: Icon, label }: { view: AppView, icon: any, label: string }) => (
-    <button
-      onClick={() => handleNavClick(view)}
-      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 ${
-        currentView === view 
-          ? 'bg-pesantren-700 text-white shadow-md' 
-          : 'text-pesantren-100 hover:bg-pesantren-800 hover:text-white'
-      }`}
-    >
-      <Icon size={20} />
-      <span className={`${!isSidebarOpen && 'md:hidden'} block`}>{label}</span>
-    </button>
-  );
-
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden relative">
-      
+
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-20 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      <aside 
+      <aside
         className={`
           fixed md:relative inset-y-0 left-0 z-30
           bg-pesantren-900 shadow-xl transition-all duration-300 ease-in-out flex flex-col
@@ -86,50 +95,50 @@ const App: React.FC = () => {
         `}
       >
         <div className="h-16 flex items-center justify-center border-b border-pesantren-800 relative">
-           <Sprout className="text-green-400" size={32} />
-           <span className={`ml-3 font-bold text-white text-lg tracking-wide transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 md:hidden'}`}>
+          <Sprout className="text-green-400" size={32} />
+          <span className={`ml-3 font-bold text-white text-lg tracking-wide transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 md:hidden'}`}>
             smartpes
-           </span>
-           
-           <button 
-             onClick={() => setSidebarOpen(false)} 
-             className="absolute right-4 top-5 text-pesantren-300 md:hidden"
-           >
-             <X size={20} />
-           </button>
+          </span>
+
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="absolute right-4 top-5 text-pesantren-300 md:hidden"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="flex-1 py-6 px-3 space-y-2 overflow-y-auto">
-          <NavItem view={AppView.DASHBOARD} icon={LayoutDashboard} label="Dashboard" />
-          <NavItem view={AppView.SANTRI} icon={Users} label="Data Santri" />
-          <NavItem view={AppView.DONATUR} icon={Heart} label="Donasi Beras" />
+          <NavItem view={AppView.DASHBOARD} icon={LayoutDashboard} label="Dashboard" currentView={currentView} isSidebarOpen={isSidebarOpen} onClick={handleNavClick} />
+          <NavItem view={AppView.SANTRI} icon={Users} label="Data Santri" currentView={currentView} isSidebarOpen={isSidebarOpen} onClick={handleNavClick} />
+          <NavItem view={AppView.DONATUR} icon={Heart} label="Donasi Beras" currentView={currentView} isSidebarOpen={isSidebarOpen} onClick={handleNavClick} />
         </nav>
 
         <div className="p-4 border-t border-pesantren-800">
-           <button className="flex items-center space-x-3 text-pesantren-200 hover:text-white w-full px-2 transition-colors">
-              <LogOut size={20} />
-              <span className={`${!isSidebarOpen && 'md:hidden'} block`}>Keluar</span>
-           </button>
+          <button className="flex items-center space-x-3 text-pesantren-200 hover:text-white w-full px-2 transition-colors">
+            <LogOut size={20} />
+            <span className={`${!isSidebarOpen && 'md:hidden'} block`}>Keluar</span>
+          </button>
         </div>
       </aside>
 
       <div className="flex-1 flex flex-col overflow-hidden w-full">
         <header className="h-16 bg-white shadow-sm flex items-center justify-between px-4 md:px-6 z-10 flex-shrink-0">
-          <button 
+          <button
             onClick={() => setSidebarOpen(!isSidebarOpen)}
             className="p-2 rounded-md hover:bg-gray-100 text-gray-600 focus:outline-none"
           >
             <Menu size={24} />
           </button>
-          
+
           <div className="flex items-center space-x-3 md:space-x-4">
-             <div className="text-right hidden sm:block">
-               <p className="text-sm font-semibold text-gray-800">Admin Pesantren</p>
-               <p className="text-xs text-gray-500">Administrator</p>
-             </div>
-             <div className="h-9 w-9 md:h-10 md:w-10 bg-pesantren-100 rounded-full flex items-center justify-center text-pesantren-700 font-bold border border-pesantren-200 text-sm md:text-base">
-               A
-             </div>
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-semibold text-gray-800">Admin Pesantren</p>
+              <p className="text-xs text-gray-500">Administrator</p>
+            </div>
+            <div className="h-9 w-9 md:h-10 md:w-10 bg-pesantren-100 rounded-full flex items-center justify-center text-pesantren-700 font-bold border border-pesantren-200 text-sm md:text-base">
+              A
+            </div>
           </div>
         </header>
 
