@@ -36,17 +36,4 @@ export const generateThankYouLetter = async (donaturName: string, amount: number
   }
 };
 
-export const generatePesantrenInsight = async (santriCount: number, donaturCount: number, totalRice: number): Promise<string> => {
-  if (!ai) return "API Key belum dikonfigurasi.";
 
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: `Sebagai konsultan manajemen pesantren, berikan 3 saran singkat dan strategis untuk pengembangan pesantren dengan data saat ini: ${santriCount} santri, ${donaturCount} donatur aktif, dan stok beras donasi terkumpul ${totalRice} Kg. Fokus pada kemandirian pangan dan pendidikan.`,
-    });
-    return response.text || "Gagal menghasilkan analisis.";
-  } catch (error) {
-    console.error("Gemini Error:", error);
-    return "Terjadi kesalahan saat menghubungi layanan AI.";
-  }
-};
